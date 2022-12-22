@@ -6,8 +6,8 @@ mqtt_sub_topic="mqtt/avirup171/#"
 client=mqtt.Client()
 edgeDeviceSendTopic="mqtt/avirup171/edgeDevice"
 edgeDeviceReceiveTopicBase="mqtt/avirup171/"
-serverSideCTrigger="mqtt/avirup171/server"
-serverUrl="http://localhost:5000/telemetrysink"
+serverUrl="http://127.0.0.1:5000/telemetrysink"
+headers =  {"Content-Type":"application/json"}
 
 def on_connect(client, userdata, flags, rc):
     client.connected_flag=True
@@ -29,18 +29,16 @@ def on_message(client, userdata, message):
     print("message received  ",str(message.payload))
     print("message topic  ",str(message.topic))
     rawPayloadData= message.payload.decode('UTF-8')
-    topic = message.payload.decode('UTF-8')
-    
+    topic = str(message.topic)
+    print(topic)
     if(topic=="mqtt/avirup171/edgeDevice"):
-        jsonData=json.loads(rawPayloadData)
-        response=requests.post(serverUrl,jsonData,headers={"application/json"})
+        jsonData=json.dumps(rawPayloadData)
+        response=requests.post(serverUrl,jsonData,headers=headers)
         responseData=response.json()
+        device_id=responseData["device_id"]
+        pubTopic=edgeDeviceReceiveTopicBase+device_id
+        client.publish(pubTopic,str(responseData))
         print(responseData)
-    
-    
-   
-    #Convert the data to JSON
-    jsonData=json.loads(rawPayloadData)
 
 
 def init_mqtt(client,mqtt_host,mqtt_port):
