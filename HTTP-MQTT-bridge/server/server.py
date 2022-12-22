@@ -8,5 +8,7 @@ def globalRoute():
 @app.route('/telemetrysink', methods = ['POST'])
 def telemtrySink():
     params=request.json
-    
-    return None
+    return params
+
+if __name__=='__main__':
+    app.run()
